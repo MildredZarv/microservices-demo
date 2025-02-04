@@ -1,0 +1,7 @@
+customer\model\CustomerRegistrationRequest.class
+customer\service\CustomerService.class
+customer\model\Customer$CustomerBuilder.class
+customer\model\Customer.class
+customer\controller\CustomerController.class
+customer\repository\CustomerRepository.class
+customer\CustomerApplication.class
