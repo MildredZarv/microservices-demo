@@ -1,16 +1,19 @@
 package customer.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import customer.model.Customer;
 import customer.model.CustomerRegistrationRequest;
+import customer.model.FraudCheckResponse;
 import customer.repository.CustomerRepository;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class CustomerService {
-	@Autowired
-	private CustomerRepository customerRepository;
+	private final CustomerRepository customerRepository;
+	private final RestTemplate restTemplate;
 	
 	public void registerCustomer(CustomerRegistrationRequest request) {
 		Customer customer = Customer.builder()
@@ -18,8 +21,14 @@ public class CustomerService {
 				.lastName(request.lastName())
 				.email(request.email())
 				.build();
+		customerRepository.saveAndFlush(customer);
+		FraudCheckResponse fraudCheckResponse = restTemplate.getForObject(
+				"http://localhost:8082/api/v1/fraud-check/{customerId}", 
+				FraudCheckResponse.class, 
+				customer.getId());
 		
-		customerRepository.save(customer);
-		
+		if(fraudCheckResponse.isFraudster()) {
+			throw new IllegalStateException("fraudster");
+		}
 	}
 }
